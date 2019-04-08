@@ -104,8 +104,9 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
                              ])
                             )
         IgnoreLabelDataset(cifar)
-
+        
         # use get_score_dataset(), instead of get_score_image_tensor(), other usage is the same
+        is_fid_model = is_fid_pytorch.ScoreModel(mode=3, cuda=True)
         is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw)
         ```
 
