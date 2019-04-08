@@ -1,6 +1,7 @@
 .idea/
 *.tgz
 *.npz
+!fid_stats_cifar10_train.npz
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

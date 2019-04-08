@@ -1,7 +1,7 @@
 # res/
 
 * in this [res/](./) dir, should contain:
-	* inception pretrained weights `inception-2015-12-05.tgz` from [link](http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz)
+	* inception pretrained weights `inception-2015-12-05.tgz` from [link](http://download.tensorflow.org/models/image/imagenet/inception-2015-12-05.tgz) (for using the TF implementation)
 
 * in [res/stats_tf/](stats_tf/) dir, should contain:
 	* precalculated statistics for datasets from [link](http://bioinf.jku.at/research/ttur/)

@@ -1,25 +1,12 @@
 # metrics
 
-This repo contains information/implementation (PyTorch, Tensorflow) about IS and FID score. TF implementations are intended to compute the exact same output for reporting in papers. Discussion/PR/Issues are very welcomed.
+This repo contains information/implementation (PyTorch, Tensorflow) about IS and FID score. This is a handy toolbox that you can easily add to your projects. TF implementations are intended to compute the exact same output as the official ones for reporting in papers. Discussion/PR/Issues are very welcomed.
+
+
 
 ## Usage
 
-put this `metrics/` folder in your projects, and __see each .py's head comment__ for usage. We also need to download some files in [res/](res/), see [res/README.md](res/README.md) for more details.
-
-
-
-## Pytorch Implementation (cannot report in papers, but can get an quick view)
-
--   [x] [inception score-PyTorch: is_fid_pytorch.py](is_fid_pytorch.py)
--   [x] [FID score-PyTorch: is_fid_pytorch.py](is_fid_pytorch.py)
--   [x] [Calculate stats-TF: is_fid_pytorch.py](is_fid_pytorch.py)
-
-```python
-from metrics import is_fid_pytorch
-is_fid_model = is_fid_pytorch.ScoreModel(mode=2, cuda=True, stats_file='metrics/res/stats_pytorch/fid_stats_cifar10_train.npz') # calc FID towards precalculated CIFAR10 stats
-imgs_nchw = torch.Tensor(np.zeros((100, 3, 299, 299))) # an NCHW pytorch tensor normalized to -1~1, by mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]
-is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw)
-```
+Put this `metrics/` folder in your projects, and __see each .py's head comment__, and below (Pytorch) for usage. We also need to download some files in [res/](res/), see [res/README.md](res/README.md) for more details.
 
 
 
@@ -27,7 +14,93 @@ is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw)
 
 -   [x] [inception score-TF: inception_score_official_tf.py](inception_score_official_tf.py)
 -   [x] [FID score-TF: fid_official_tf.py](fid_official_tf.py)
--   [x] [Calculate mu sigma-TF: precalc_stats_official_tf.py](precalc_stats_official_tf.py)
+-   [x] [Calculate stats (mu, sigma)-TF: precalc_stats_official_tf.py](precalc_stats_official_tf.py)
+
+
+
+## Pytorch Implementation (CANNOT report in papers, but can get an quick view)
+
+* [is_fid_pytorch.py](is_fid_pytorch.py)
+    * [x] inception score
+    * [x] FID score
+    * [x] calculate stats for custom images in a folder (mu, sigma)
+
+* command line usage
+    * calculate IS, FID
+        ```python
+        # calc IS score on CIFAR10, will download CIFAR10 data to ../data/cifar10
+        python is_fid_pytorch.py
+
+        # calc IS score on custom images in a folder/
+        python is_fid_pytorch.py --path foldername/
+
+        # calc IS, FID score on custom images in a folder/, compared to CIFAR10 (given precalculated stats)
+        python is_fid_pytorch.py --path foldername/ --fid res/stats_pytorch/fid_stats_cifar10_train.npz
+
+        # calc FID on custom images in two folders/
+        python is_fid_pytorch.py --path foldername1/ --fid foldername2/
+
+        # calc FID on two precalculated stats
+        python is_fid_pytorch.py --path res/stats_pytorch/fid_stats_cifar10_train.npz --fid res/stats_pytorch/fid_stats_cifar10_train.npz
+        ```
+
+    * precalculated stats
+
+        ```python
+        # precalculate stats store as npz for CIFAR 10, will download CIFAR10 data to ../data/cifar10
+        python is_fid_pytorch.py --save-stats-path res/stats_pytorch/fid_stats_cifar10_train.npz
+        
+        # precalculate stats store as npz for images in folder/
+        python is_fid_pytorch.py --path foldername/ --save-stats-path res/stats_pytorch/fid_stats_folder.npz
+        ```
+
+        
+
+* in code usage
+
+    * from img tensor (NCHW), mode = 1 or 2
+    * `mode=1`: image tensor passed in is already normalized by `mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]`
+    * `mode=2`: image tensor passed in is already normalized by `mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]`
+
+        ```python
+        from metrics import is_fid_pytorch
+
+        # using precalculated stats (.npz) for FID calculation
+        is_fid_model = is_fid_pytorch.ScoreModel(mode=2, stats_file='res/stats_pytorch/fid_stats_cifar10_train.npz', cuda=cuda)
+        imgs_nchw = torch.Tensor(50000, C, H, W)
+        is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw)
+
+        # we can also pass in mu, sigma for get_score_image_tensor()
+        is_fid_model = is_fid_pytorch.ScoreModel(mode=2, cuda=cuda)
+        mu, sigma = is_fid_pytorch.read_stats_file('res/stats_pytorch/fid_stats_cifar10_train.npz')
+        is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw, mu1=mu, sigma1=sigma)
+
+        # if no need FID
+        is_fid_model = is_fid_pytorch.ScoreModel(mode=2, cuda=cuda)
+        is_mean, is_std, _ = is_fid_model.get_score_image_tensor(imgs_nchw)
+
+        # if want stats (mu, sigma) for imgs_nchw, send in return_stats=True
+        is_mean, is_std, _, mu, sigma = is_fid_model.get_score_image_tensor(imgs_nchw, return_stats=True)
+        ```
+
+    * from pytorch dataset, mode=3
+
+        ```python
+        from metrics import is_fid_pytorch
+        cifar = dset.CIFAR10(root='../data/cifar10', download=True,
+                             transform=transforms.Compose([
+                                 transforms.Resize(32),
+                                 transforms.ToTensor(),
+                                 transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+                             ])
+                            )
+        IgnoreLabelDataset(cifar)
+
+        # use get_score_dataset(), instead of get_score_image_tensor(), other usage is the same
+        is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw)
+        ```
+
+
 
 ## TODO
 
@@ -82,3 +155,4 @@ is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw)
   * TF seemed to provide a [good implementation](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/gan/python/eval/python/classifier_metrics_impl.py)
   * [zhihu: Frechet Inception Score (FID)](https://zhuanlan.zhihu.com/p/54213305)
   * [Explanation from Neal Jean](https://nealjean.com/ml/frechet-inception-distance/)
+
