@@ -6,7 +6,9 @@ This repo contains information/implementation (PyTorch, Tensorflow) about IS and
 
 ## Usage
 
-Put this `metrics/` folder in your projects, and __see each .py's head comment__, and below (Pytorch) for usage. We also need to download some files in [res/](res/), see [res/README.md](res/README.md) for more details.
+Put this `metrics/` folder in your projects, and __see below (Pytorch), and each .py's head comment__ for usage.
+
+We also need to download some files in [res/](res/), see [res/README.md](res/README.md) for more details.
 
 
 
@@ -21,32 +23,39 @@ Put this `metrics/` folder in your projects, and __see each .py's head comment__
 ## Pytorch Implementation (CANNOT report in papers, but can get an quick view)
 
 * [is_fid_pytorch.py](is_fid_pytorch.py)
+
     * [x] inception score
+
     * [x] FID score
+
     * [x] calculate stats for custom images in a folder (mu, sigma)
+
+    * [x] multi-GPU support by `nn.DataParallel`
+
+        * e.g. `CUDA_VISIBLE_DEVICES=0,1,2,3` will use 4 GPU.
 
 * command line usage
     * calculate IS, FID
-        ```python
+        ```bash
         # calc IS score on CIFAR10, will download CIFAR10 data to ../data/cifar10
         python is_fid_pytorch.py
-
+        
         # calc IS score on custom images in a folder/
         python is_fid_pytorch.py --path foldername/
-
+        
         # calc IS, FID score on custom images in a folder/, compared to CIFAR10 (given precalculated stats)
         python is_fid_pytorch.py --path foldername/ --fid res/stats_pytorch/fid_stats_cifar10_train.npz
-
+        
         # calc FID on custom images in two folders/
         python is_fid_pytorch.py --path foldername1/ --fid foldername2/
-
+        
         # calc FID on two precalculated stats
         python is_fid_pytorch.py --path res/stats_pytorch/fid_stats_cifar10_train.npz --fid res/stats_pytorch/fid_stats_cifar10_train.npz
         ```
 
     * precalculated stats
 
-        ```python
+        ```bash
         # precalculate stats store as npz for CIFAR 10, will download CIFAR10 data to ../data/cifar10
         python is_fid_pytorch.py --save-stats-path res/stats_pytorch/fid_stats_cifar10_train.npz
         
@@ -109,6 +118,8 @@ Put this `metrics/` folder in your projects, and __see each .py's head comment__
 -   [ ] MS-SSIM score - Tensorflow
 
 
+
+## Info
 
 ### Inception Score (IS)
 
