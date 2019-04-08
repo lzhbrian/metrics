@@ -99,7 +99,7 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
                              ])
                             )
         IgnoreLabelDataset(cifar)
-        is_mean, is_std, fid = is_fid_model.get_score_dataset(IgnoreLabelDataset(cifar))
+        is_mean, is_std, _ = is_fid_model.get_score_dataset(IgnoreLabelDataset(cifar))
         ```
 
 
