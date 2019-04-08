@@ -32,45 +32,39 @@
         python is_fid_pytorch.py --path foldername/ --save-stats-path res/stats_pytorch/fid_stats_folder.npz
 
     # use it in code:
-        # from img Tensor (NCHW), mode = 1 or 2
-        # 1: images is already normalized by mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
-        # 2: images is already normalized by mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]
+        * `mode=1`: image tensor passed in is already normalized by `mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]`
+    	* `mode=2`: image tensor passed in is already normalized by `mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]`
+
         ```
         from metrics import is_fid_pytorch
+        
+        # using precalculated stats (.npz) for FID calculation
         is_fid_model = is_fid_pytorch.ScoreModel(mode=2, stats_file='res/stats_pytorch/fid_stats_cifar10_train.npz', cuda=cuda)
-        imgs_nchw = Tensor(50000, C, H, W)
+        imgs_nchw = torch.Tensor(50000, C, H, W) # torch.Tensor in -1~1, normalized by mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]
         is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw)
-        ```
+        
+        # we can also pass in mu, sigma for get_score_image_tensor()
+        is_fid_model = is_fid_pytorch.ScoreModel(mode=2, cuda=cuda)
+        mu, sigma = is_fid_pytorch.read_stats_file('res/stats_pytorch/fid_stats_cifar10_train.npz')
+        is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw, mu1=mu, sigma1=sigma)
+        
         # if no need FID
-        ```
         is_fid_model = is_fid_pytorch.ScoreModel(mode=2, cuda=cuda)
         is_mean, is_std, _ = is_fid_model.get_score_image_tensor(imgs_nchw)
-        ```
-
-        # from dataset, mode = 3
-        ```
-        from metrics import is_fid_pytorch
-        cifar = dset.CIFAR10(root='data/cifar10', download=True,
+        
+        # if want stats (mu, sigma) for imgs_nchw, send in return_stats=True
+        is_mean, is_std, _, mu, sigma = is_fid_model.get_score_image_tensor(imgs_nchw, return_stats=True)
+        
+        # from pytorch dataset, use get_score_dataset(), instead of get_score_image_tensor(), other usage is the same
+        cifar = dset.CIFAR10(root='../data/cifar10', download=True,
                              transform=transforms.Compose([
                                  transforms.Resize(32),
                                  transforms.ToTensor(),
                                  transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
                              ])
-        )
+                            )
         IgnoreLabelDataset(cifar)
-        is_fid_model = is_fid_pytorch.ScoreModel(mode=3, stats_file='res/stats_pytorch/fid_stats_cifar10_train.npz', cuda=True)
-        is_mean, is_std, fid = is_fid_model.get_score_dataset(IgnoreLabelDataset(cifar), n_split=10, batch_size=64)
-        ```
-        # if need stats
-        ```
-        is_fid_model = is_fid_pytorch.ScoreModel(mode=3, stats_file='res/stats_pytorch/fid_stats_cifar10_train.npz', cuda=True)
-        is_mean, is_std, fid, mu, sigma = is_fid_model.get_score_dataset(IgnoreLabelDataset(cifar), n_split=10,
-                                                                         batch_size=64, return_stats=True)
-        ```
-        # if no need FID
-        ```
-        is_fid_model = is_fid_pytorch.ScoreModel(mode=3, cuda=True)
-        is_mean, is_std, _ = is_fid_model.get_score_dataset(IgnoreLabelDataset(cifar), n_split=10, batch_size=64)
+        is_mean, is_std, _ = is_fid_model.get_score_dataset(IgnoreLabelDataset(cifar))
         ```
 
 @Note:
@@ -180,7 +174,6 @@ class ScoreModel:
                 and in range of [-1, 1]
                 1: image passed in is normalized by mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]
                 2: image passed in is normalized by mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]
-                3: direct a dataset, should be mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]
         """
         # load mu, sigma for calc FID
         self.calc_fid = False
@@ -203,7 +196,7 @@ class ScoreModel:
         self.mode = mode
         if self.mode == 1:
             transform_input = True
-        elif self.mode in [2, 3]:
+        elif self.mode == 2:
             transform_input = False
         else:
             raise Exception("ERR: unknown input img type, pls specify norm method!")
@@ -264,7 +257,6 @@ class ScoreModel:
             is_mean, is_std, fid
             mu, sigma of dataset
         """
-        assert self.mode in [1, 2]
 
         n_img = imgs_nchw.shape[0]
 
@@ -311,7 +303,6 @@ class ScoreModel:
             is_mean, is_std, fid
             mu, sigma of dataset
         """
-        assert self.mode == 3
 
         n_img = len(dataset)
         dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size)
@@ -398,7 +389,7 @@ if __name__ == '__main__':
         IgnoreLabelDataset(cifar)
 
         print ("Calculating IS score on CIFAR 10...")
-        is_fid_model = ScoreModel(mode=3, cuda=True)
+        is_fid_model = ScoreModel(mode=2, cuda=True)
         # save calculated npz
         if args.save_stats_path:
             is_mean, is_std, _, mu, sigma = is_fid_model.get_score_dataset(IgnoreLabelDataset(cifar),

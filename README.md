@@ -14,17 +14,21 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
 
 ## TF implementations (almost the same as official, just changed the interface, can be reported in papers)
 
--   [x] [inception score-TF: inception_score_official_tf.py](inception_score_official_tf.py)
--   [x] [FID score-TF: fid_official_tf.py](fid_official_tf.py)
--   [x] [Calculate stats (mu, sigma)-TF: precalc_stats_official_tf.py](precalc_stats_official_tf.py)
+-   [x] [inception_score_official_tf.py](inception_score_official_tf.py): inception score
+-   [x] [fid_official_tf.py](fid_official_tf.py): FID score
+-   [x] [precalc_stats_official_tf.py](precalc_stats_official_tf.py): calculate stats (mu, sigma)
 
 
 
 ## Pytorch Implementation (CANNOT report in papers, but can get an quick view)
 
+* Requirements
+
+    * pytorch, torchvision, scipy, numpy, tqdm
+
 * [is_fid_pytorch.py](is_fid_pytorch.py)
 
-    * [x] inception score
+    * [x] inception score, get around `mean=9.67278, std=0.14992` for CIFAR-10 train data when n_split=10
 
     * [x] FID score
 
