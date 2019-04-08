@@ -67,35 +67,30 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
 
 * in code usage
 
-    * from img tensor (NCHW), mode = 1 or 2
     * `mode=1`: image tensor passed in is already normalized by `mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]`
     * `mode=2`: image tensor passed in is already normalized by `mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]`
 
         ```python
         from metrics import is_fid_pytorch
-
+        
         # using precalculated stats (.npz) for FID calculation
         is_fid_model = is_fid_pytorch.ScoreModel(mode=2, stats_file='res/stats_pytorch/fid_stats_cifar10_train.npz', cuda=cuda)
         imgs_nchw = torch.Tensor(50000, C, H, W) # torch.Tensor in -1~1, normalized by mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]
         is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw)
-
+        
         # we can also pass in mu, sigma for get_score_image_tensor()
         is_fid_model = is_fid_pytorch.ScoreModel(mode=2, cuda=cuda)
         mu, sigma = is_fid_pytorch.read_stats_file('res/stats_pytorch/fid_stats_cifar10_train.npz')
         is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw, mu1=mu, sigma1=sigma)
-
+        
         # if no need FID
         is_fid_model = is_fid_pytorch.ScoreModel(mode=2, cuda=cuda)
         is_mean, is_std, _ = is_fid_model.get_score_image_tensor(imgs_nchw)
-
+        
         # if want stats (mu, sigma) for imgs_nchw, send in return_stats=True
         is_mean, is_std, _, mu, sigma = is_fid_model.get_score_image_tensor(imgs_nchw, return_stats=True)
-        ```
-
-    * from pytorch dataset, mode=3
-
-        ```python
-        from metrics import is_fid_pytorch
+        
+        # from pytorch dataset, use get_score_dataset(), instead of get_score_image_tensor(), other usage is the same
         cifar = dset.CIFAR10(root='../data/cifar10', download=True,
                              transform=transforms.Compose([
                                  transforms.Resize(32),
@@ -104,11 +99,9 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
                              ])
                             )
         IgnoreLabelDataset(cifar)
-        
-        # use get_score_dataset(), instead of get_score_image_tensor(), other usage is the same
-        is_fid_model = is_fid_pytorch.ScoreModel(mode=3, cuda=True)
-        is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw)
+        is_mean, is_std, fid = is_fid_model.get_score_dataset(IgnoreLabelDataset(cifar))
         ```
+
 
 
 
