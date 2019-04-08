@@ -23,6 +23,7 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
 ## Pytorch Implementation (CANNOT report in papers, but can get an quick view)
 
 * Requirements
+
     * pytorch, torchvision, scipy, numpy, tqdm
 * [is_fid_pytorch.py](is_fid_pytorch.py)
     * [x] inception score, get around `mean=9.67278, std=0.14992` for CIFAR-10 train data when n_split=10
@@ -49,7 +50,7 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
         python is_fid_pytorch.py --path res/stats_pytorch/fid_stats_cifar10_train.npz --fid res/stats_pytorch/fid_stats_cifar10_train.npz
         ```
 
-    * precalculated stats
+    * precalculate stats
         ```bash
         # precalculate stats store as npz for CIFAR 10, will download CIFAR10 data to ../data/cifar10
         python is_fid_pytorch.py --save-stats-path res/stats_pytorch/fid_stats_cifar10_train.npz
