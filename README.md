@@ -1,6 +1,6 @@
 # metrics
 
-This repo contains information/implementation (PyTorch, Tensorflow) about IS and FID score. TF implementations are intended to compute the exact same output for reporting in papers.
+This repo contains information/implementation (PyTorch, Tensorflow) about IS and FID score. TF implementations are intended to compute the exact same output for reporting in papers. Discussion/PR/Issues are very welcomed.
 
 ## Usage
 
