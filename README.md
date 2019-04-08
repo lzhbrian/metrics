@@ -76,7 +76,7 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
 
         # using precalculated stats (.npz) for FID calculation
         is_fid_model = is_fid_pytorch.ScoreModel(mode=2, stats_file='res/stats_pytorch/fid_stats_cifar10_train.npz', cuda=cuda)
-        imgs_nchw = torch.Tensor(50000, C, H, W)
+        imgs_nchw = torch.Tensor(50000, C, H, W) # torch.Tensor in -1~1, normalized by mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]
         is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw)
 
         # we can also pass in mu, sigma for get_score_image_tensor()
