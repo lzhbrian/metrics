@@ -1,18 +1,33 @@
-# GAN Metrics
+# metrics
 
-This repo contains information about IS and FID score.
+This repo contains information/implementation about IS and FID score. These implementations are intended to compute the exact same output for reporting in papers
 
-Note that if we want to report IS and FID score in papers, we must use the official TF implementaion as noted by many [[1]](https://github.com/mseitzer/pytorch-fid/blame/master/README.md#L12) [[2]](https://github.com/ajbrock/BigGAN-PyTorch/blob/master/inception_utils.py#L8): 
+put this `metrics/` folder in your projects, and see each .py's note for usage
 
-* [Offical IS: openai/improved-gan](https://github.com/openai/improved-gan)
-* [Official FID: bioinf-jku/TTUR](https://github.com/bioinf-jku/TTUR)
+## Pytorch Implementation
+
+-   [x] [inception score-PyTorch: is_fid_pytorch.py](is_fid_pytorch.py)
+-   [x] [FID score-PyTorch: is_fid_pytorch.py](is_fid_pytorch.py)
+-   [x] [Calculate stats-TF: is_fid_pytorch.py](is_fid_pytorch.py)
+
+## Almost the same as official TF implementations (just changed the interface, can be reported in papers)
+
+-   [x] [inception score-TF: inception_score_official_tf.py](inception_score_official_tf.py)
+-   [x] [FID score-TF: fid_official_tf.py](fid_official_tf.py)
+-   [x] [Calculate mu sigma-TF: precalc_stats_official_tf.py](precalc_stats_official_tf.py)
+
+## TODO
+
+-   [ ] Refactor TF implementation of IS, FID Together
+-   [ ] MS-SSIM score - PyTorch
+-   [ ] MS-SSIM score - Tensorflow
 
 
 
 ### Inception Score (IS)
 
 * Assumption
-  * MEANINGFUL: The generated image should be clear, the output probability of a classifier network should be [0.9, 0.05, ...] (largely skewed to a class). $p(y|\mathbf{x})​$ is of __low entropy__.
+  * MEANINGFUL: The generated image should be clear, the output probability of a classifier network should be [0.9, 0.05, ...] (largely skewed to a class). $p(y|\mathbf{x})$ is of __low entropy__.
   * DIVERSITY: If we have 10 classes, the generated image should be averagely distributed. So that the marginal distribution $p(y) = \frac{1}{N} \sum_{i=1}^{N} p(y|\mathbf{x}^{(i)})$ is of __high entropy__.
   * Better models: KL Divergence of $p(y|\mathbf{x})$ and $p(y)$ should be high.
 * Formulation
