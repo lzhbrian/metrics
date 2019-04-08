@@ -1,16 +1,29 @@
 # metrics
 
-This repo contains information/implementation about IS and FID score. These implementations are intended to compute the exact same output for reporting in papers
+This repo contains information/implementation (PyTorch, Tensorflow) about IS and FID score. TF implementations are intended to compute the exact same output for reporting in papers.
 
-put this `metrics/` folder in your projects, and see each .py's note for usage
+## Usage
 
-## Pytorch Implementation
+put this `metrics/` folder in your projects, and __see each .py's head comment__ for usage
+
+
+
+## Pytorch Implementation (cannot report in papers, but can get an quick view)
 
 -   [x] [inception score-PyTorch: is_fid_pytorch.py](is_fid_pytorch.py)
 -   [x] [FID score-PyTorch: is_fid_pytorch.py](is_fid_pytorch.py)
 -   [x] [Calculate stats-TF: is_fid_pytorch.py](is_fid_pytorch.py)
 
-## Almost the same as official TF implementations (just changed the interface, can be reported in papers)
+```
+from metrics import is_fid_pytorch
+is_fid_model = is_fid_pytorch.ScoreModel(mode=2, cuda=cuda, stats_file='metrics/res/stats_pytorch/fid_stats_cifar10_train.npz') # calc FID towards precalculated CIFAR10 stats
+imgs_nchw = np.zeros((100, 3, 299, 299)) # an NCHW pytorch tensor normalized to -1~1, by mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]
+is_mean, is_std, fid = is_fid_model.get_score_image_tensor(imgs_nchw)
+```
+
+
+
+## TF implementations (almost the same as official, just changed the interface, can be reported in papers)
 
 -   [x] [inception score-TF: inception_score_official_tf.py](inception_score_official_tf.py)
 -   [x] [FID score-TF: fid_official_tf.py](fid_official_tf.py)

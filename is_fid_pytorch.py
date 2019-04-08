@@ -257,7 +257,7 @@ class ScoreModel:
                                n_split=10, batch_size=32, return_stats=False):
         """
         param:
-            imgs_nchw -- ndarray, size=(N,C,H,W), in range of [-1, 1]
+            imgs_nchw -- Pytorch Tensor, size=(N,C,H,W), in range of [-1, 1]
             batch_size -- batch size for feeding into Inception v3
             n_splits -- number of splits
         return:
