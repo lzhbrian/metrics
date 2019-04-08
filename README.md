@@ -14,30 +14,22 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
 
 ## TF implementations (almost the same as official, just changed the interface, can be reported in papers)
 
--   [x] [inception_score_official_tf.py](inception_score_official_tf.py): inception score
--   [x] [fid_official_tf.py](fid_official_tf.py): FID score
--   [x] [precalc_stats_official_tf.py](precalc_stats_official_tf.py): calculate stats (mu, sigma)
+- [x] [inception_score_official_tf.py](inception_score_official_tf.py): inception score
+- [x] [fid_official_tf.py](fid_official_tf.py): FID score
+- [x] [precalc_stats_official_tf.py](precalc_stats_official_tf.py): calculate stats (mu, sigma)
 
 
 
 ## Pytorch Implementation (CANNOT report in papers, but can get an quick view)
 
 * Requirements
-
     * pytorch, torchvision, scipy, numpy, tqdm
-
 * [is_fid_pytorch.py](is_fid_pytorch.py)
-
     * [x] inception score, get around `mean=9.67278, std=0.14992` for CIFAR-10 train data when n_split=10
-
     * [x] FID score
-
     * [x] calculate stats for custom images in a folder (mu, sigma)
-
     * [x] multi-GPU support by `nn.DataParallel`
-
         * e.g. `CUDA_VISIBLE_DEVICES=0,1,2,3` will use 4 GPU.
-
 * command line usage
     * calculate IS, FID
         ```bash
@@ -58,7 +50,6 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
         ```
 
     * precalculated stats
-
         ```bash
         # precalculate stats store as npz for CIFAR 10, will download CIFAR10 data to ../data/cifar10
         python is_fid_pytorch.py --save-stats-path res/stats_pytorch/fid_stats_cifar10_train.npz
@@ -71,9 +62,8 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
 
 * in code usage
 
-    * `mode=1`: image tensor passed in is already normalized by `mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]`
-    * `mode=2`: image tensor passed in is already normalized by `mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]`
-
+    * `mode=1`: image tensor has already normalized by `mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]`
+    * `mode=2`: image tensor has already normalized by `mean=[0.500, 0.500, 0.500], std=[0.500, 0.500, 0.500]`
         ```python
         from metrics import is_fid_pytorch
         
@@ -107,13 +97,11 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
         ```
 
 
-
-
 ## TODO
 
--   [ ] Refactor TF implementation of IS, FID Together
--   [ ] MS-SSIM score - PyTorch
--   [ ] MS-SSIM score - Tensorflow
+- [ ] Refactor TF implementation of IS, FID Together
+- [ ] MS-SSIM score - PyTorch
+- [ ] MS-SSIM score - Tensorflow
 
 
 
@@ -122,46 +110,46 @@ We also need to download some files in [res/](res/), see [res/README.md](res/REA
 ### Inception Score (IS)
 
 * Assumption
-  * MEANINGFUL: The generated image should be clear, the output probability of a classifier network should be [0.9, 0.05, ...] (largely skewed to a class). $p(y|\mathbf{x})$ is of __low entropy__.
-  * DIVERSITY: If we have 10 classes, the generated image should be averagely distributed. So that the marginal distribution $p(y) = \frac{1}{N} \sum_{i=1}^{N} p(y|\mathbf{x}^{(i)})$ is of __high entropy__.
-  * Better models: KL Divergence of $p(y|\mathbf{x})$ and $p(y)$ should be high.
+    * MEANINGFUL: The generated image should be clear, the output probability of a classifier network should be [0.9, 0.05, ...] (largely skewed to a class). $p(y|\mathbf{x})$ is of __low entropy__.
+    * DIVERSITY: If we have 10 classes, the generated image should be averagely distributed. So that the marginal distribution $p(y) = \frac{1}{N} \sum_{i=1}^{N} p(y|\mathbf{x}^{(i)})$ is of __high entropy__.
+    * Better models: KL Divergence of $p(y|\mathbf{x})$ and $p(y)$ should be high.
 * Formulation
-  * $\mathbf{IS} = \exp (\mathbb{E}_{\mathbf{x} \sim p_g} D_{KL} [p(y|\mathbf{x}) || p(y)] )$
-  * where
-    * $\mathbf{x}$ is sampled from generated data
-    * $p(y|\mathbf{x})​$ is the output probability of Inception v3 when input is $\mathbf{x}​$
-    * $p(y) = \frac{1}{N} \sum_{i=1}^{N} p(y|\mathbf{x}^{(i)})$ is the average output probability of all generated data (from InceptionV3, 1000-dim vector)
-    * $D_{KL} (\mathbf{p}||\mathbf{q}) = \sum_{j} p_{j} \log \frac{p_j}{q_j}$, where $j$ is the dimension of the output probability.
+    * $\mathbf{IS} = \exp (\mathbb{E}_{\mathbf{x} \sim p_g} D_{KL} [p(y|\mathbf{x}) || p(y)] )$
+    * where
+        * $\mathbf{x}$ is sampled from generated data
+        * $p(y|\mathbf{x})​$ is the output probability of Inception v3 when input is $\mathbf{x}​$
+        * $p(y) = \frac{1}{N} \sum_{i=1}^{N} p(y|\mathbf{x}^{(i)})$ is the average output probability of all generated data (from InceptionV3, 1000-dim vector)
+        * $D_{KL} (\mathbf{p}||\mathbf{q}) = \sum_{j} p_{j} \log \frac{p_j}{q_j}$, where $j$ is the dimension of the output probability.
 
 * Explanation
-  * $p(y)$ is a evenly distributed vector
-  * larger $\mathbf{IS}​$ score -> larger KL divergence -> larger diversity and clearness
+    * $p(y)$ is a evenly distributed vector
+    * larger $\mathbf{IS}​$ score -> larger KL divergence -> larger diversity and clearness
 * Reference
-  * Official TF implementation is in [openai/improved-gan](https://github.com/openai/improved-gan)
-  * Pytorch Implementation: [sbarratt/inception-score-pytorch](https://github.com/sbarratt/inception-score-pytorch)
-  * TF seemed to provide a [good implementation](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/gan/python/eval/python/classifier_metrics_impl.py)
-  * [scipy.stats.entropy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.entropy.html)
-  * [zhihu: Inception Score 的原理和局限性](https://zhuanlan.zhihu.com/p/54146307)
-  * [A Note on the Inception Score](https://arxiv.org/abs/1801.01973)
+    * Official TF implementation is in [openai/improved-gan](https://github.com/openai/improved-gan)
+    * Pytorch Implementation: [sbarratt/inception-score-pytorch](https://github.com/sbarratt/inception-score-pytorch)
+    * TF seemed to provide a [good implementation](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/gan/python/eval/python/classifier_metrics_impl.py)
+    * [scipy.stats.entropy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.entropy.html)
+    * [zhihu: Inception Score 的原理和局限性](https://zhuanlan.zhihu.com/p/54146307)
+    * [A Note on the Inception Score](https://arxiv.org/abs/1801.01973)
 
 
 
 ### Fréchet Inception Distance (FID)
 
 * Formulation
-  * $\mathbf{FID} = ||\mu_r - \mu_g||^2 + Tr(\Sigma_{r} + \Sigma_{g} - 2(\Sigma_r \Sigma_g)^{1/2})​$
-  * where
-    * $Tr$ is [trace of a matrix (wikipedia)](https://en.wikipedia.org/wiki/Trace_(linear_algebra))
-    * $X_r \sim \mathcal{N}(\mu_r, \Sigma_r)$ and $X_g \sim \mathcal{N}(\mu_g, \Sigma_g)$ are the 2048-dim activations  the InceptionV3 pool3 layer
-    * $\mu_r$ is the mean of real photo's feature
-    * $\mu_g$ is the mean of generated photo's feature
-    * $\Sigma_r$ is the covariance matrix of real photo's feature
-    * $\Sigma_g$ is the covariance matrix of generated photo's feature
+    * $\mathbf{FID} = ||\mu_r - \mu_g||^2 + Tr(\Sigma_{r} + \Sigma_{g} - 2(\Sigma_r \Sigma_g)^{1/2})​$
+    * where
+        * $Tr$ is [trace of a matrix (wikipedia)](https://en.wikipedia.org/wiki/Trace_(linear_algebra))
+        * $X_r \sim \mathcal{N}(\mu_r, \Sigma_r)$ and $X_g \sim \mathcal{N}(\mu_g, \Sigma_g)$ are the 2048-dim activations  the InceptionV3 pool3 layer
+        * $\mu_r$ is the mean of real photo's feature
+        * $\mu_g$ is the mean of generated photo's feature
+        * $\Sigma_r$ is the covariance matrix of real photo's feature
+        * $\Sigma_g$ is the covariance matrix of generated photo's feature
 
 * Reference
-  * Official TF implementation: [bioinf-jku/TTUR](https://github.com/bioinf-jku/TTUR)
-  * Pytorch Implementation: [mseitzer/pytorch-fid](https://github.com/mseitzer/pytorch-fid)
-  * TF seemed to provide a [good implementation](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/gan/python/eval/python/classifier_metrics_impl.py)
-  * [zhihu: Frechet Inception Score (FID)](https://zhuanlan.zhihu.com/p/54213305)
-  * [Explanation from Neal Jean](https://nealjean.com/ml/frechet-inception-distance/)
+    * Official TF implementation: [bioinf-jku/TTUR](https://github.com/bioinf-jku/TTUR)
+    * Pytorch Implementation: [mseitzer/pytorch-fid](https://github.com/mseitzer/pytorch-fid)
+    * TF seemed to provide a [good implementation](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/gan/python/eval/python/classifier_metrics_impl.py)
+    * [zhihu: Frechet Inception Score (FID)](https://zhuanlan.zhihu.com/p/54213305)
+    * [Explanation from Neal Jean](https://nealjean.com/ml/frechet-inception-distance/)
 
