@@ -246,7 +246,7 @@ class ScoreModel:
                 scores.append(entropy(pyx, py))
             split_scores.append(np.exp(np.mean(scores)))
             if n_split == 1 and return_each_score:
-                return np.mean(split_scores), np.std(split_scores), scores
+                return scores, 0
         return np.mean(split_scores), np.std(split_scores)
 
     @staticmethod
