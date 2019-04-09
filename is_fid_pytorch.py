@@ -228,11 +228,10 @@ class ScoreModel:
     @staticmethod
     def __calc_is(preds, n_split, return_each_score=False):
         """
-        regularly, return is_mean, is_std
-
+        regularly, return (is_mean, is_std)
         if n_split==1 and return_each_score==True:
-            return is_mean, is_std, scores
-        scores is a list with len(scores) = n_img = preds.shape[0]
+            return (scores, 0)
+            # scores is a list with len(scores) = n_img = preds.shape[0]
         """
 
         n_img = preds.shape[0]
@@ -257,7 +256,8 @@ class ScoreModel:
         return mu, sigma
 
     def get_score_image_tensor(self, imgs_nchw, mu1=0, sigma1=0,
-                               n_split=10, batch_size=32, return_stats=False):
+                               n_split=10, batch_size=32, return_stats=False,
+                               return_each_score=False):
         """
         param:
             imgs_nchw -- Pytorch Tensor, size=(N,C,H,W), in range of [-1, 1]
@@ -266,6 +266,11 @@ class ScoreModel:
         return:
             is_mean, is_std, fid
             mu, sigma of dataset
+
+            regularly, return (is_mean, is_std)
+            if n_split==1 and return_each_score==True:
+                return (scores, 0)
+                # scores is a list with len(scores) = n_img = preds.shape[0]
         """
 
         n_img = imgs_nchw.shape[0]
@@ -290,7 +295,7 @@ class ScoreModel:
             mu1 = self.mu1
             sigma1 = self.sigma1
 
-        is_mean, is_std = self.__calc_is(preds, n_split)
+        is_mean, is_std = self.__calc_is(preds, n_split, return_each_score)
 
         fid = -1
         if type(mu1) == type(sigma1) == np.ndarray or self.calc_fid:
@@ -302,7 +307,8 @@ class ScoreModel:
             return is_mean, is_std, fid
 
     def get_score_dataset(self, dataset, mu1=0, sigma1=0,
-                          n_split=10, batch_size=32, return_stats=False):
+                          n_split=10, batch_size=32, return_stats=False,
+                          return_each_score=False):
         """
         get score from a dataset
         param:
@@ -312,6 +318,11 @@ class ScoreModel:
         return:
             is_mean, is_std, fid
             mu, sigma of dataset
+
+            regularly, return (is_mean, is_std)
+            if n_split==1 and return_each_score==True:
+                return (scores, 0)
+                # scores is a list with len(scores) = n_img = preds.shape[0]
         """
 
         n_img = len(dataset)
@@ -335,7 +346,7 @@ class ScoreModel:
             mu1 = self.mu1
             sigma1 = self.sigma1
 
-        is_mean, is_std = self.__calc_is(preds, n_split)
+        is_mean, is_std = self.__calc_is(preds, n_split, return_each_score)
 
         fid = -1
         if type(mu1) == type(sigma1) == np.ndarray or self.calc_fid:
