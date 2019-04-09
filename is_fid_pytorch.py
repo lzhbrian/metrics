@@ -226,7 +226,15 @@ class ScoreModel:
         return pool3_ft, preds
 
     @staticmethod
-    def __calc_is(preds, n_split):
+    def __calc_is(preds, n_split, return_each_score=False):
+        """
+        regularly, return is_mean, is_std
+
+        if n_split==1 and return_each_score==True:
+            return is_mean, is_std, scores
+        scores is a list with len(scores) = n_img = preds.shape[0]
+        """
+
         n_img = preds.shape[0]
         # Now compute the mean kl-div
         split_scores = []
@@ -238,6 +246,8 @@ class ScoreModel:
                 pyx = part[i, :]
                 scores.append(entropy(pyx, py))
             split_scores.append(np.exp(np.mean(scores)))
+            if n_split == 1 and return_each_score:
+                return np.mean(split_scores), np.std(split_scores), scores
         return np.mean(split_scores), np.std(split_scores)
 
     @staticmethod
