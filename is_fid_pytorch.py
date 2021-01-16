@@ -370,7 +370,7 @@ if __name__ == '__main__':
     # read folder, return torch Tensor in NCHW, normalized
     def read_folder(foldername):
         files = []
-        for ext in ('*.png', '*.jpg', '*.jpeg', '.bmp'):
+        for ext in ('*.png', '*.jpg', '*.jpeg', '*.bmp'):
             files.extend(glob(os.path.join(foldername, ext)))
 
         img_list = []
